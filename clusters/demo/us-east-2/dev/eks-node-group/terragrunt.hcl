@@ -10,7 +10,7 @@ locals {
 }
 
 terraform {
-  source = "../../../../modules/eks-node-group"
+  source = "../../../../../modules/eks-node-group"
 }
 
 dependency "vpc" {

@@ -10,7 +10,7 @@ locals {
 }
 
 terraform {
-  source = "../../../../modules/alb-security-group"
+  source = "../../../../../modules/alb-security-group"
 }
 
 dependency "vpc" {

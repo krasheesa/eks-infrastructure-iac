@@ -10,7 +10,7 @@ locals {
 }
 
 terraform {
-  source = "../../../../modules/irsa"
+  source = "../../../../../modules/irsa"
 }
 
 dependency "eks" {

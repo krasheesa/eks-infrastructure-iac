@@ -10,7 +10,7 @@ locals {
 }
 
 terraform {
-  source = "../../../../modules/iam"
+  source = "../../../../../modules/iam"
 }
 
 inputs = {
