@@ -1,10 +1,10 @@
-variable "vpc_name" {
-  description = "Name of the VPC"
+variable "name" {
+  description = "Name to be used on all resources as prefix"
   type        = string
 }
 
-variable "vpc_cidr" {
-  description = "CIDR block for VPC"
+variable "cidr_block" {
+  description = "The CIDR block for the VPC"
   type        = string
 }
 
@@ -14,64 +14,47 @@ variable "availability_zones" {
 }
 
 variable "public_subnet_cidrs" {
-  description = "CIDR blocks for public subnets"
+  description = "List of CIDR blocks for public subnets"
   type        = list(string)
 }
 
 variable "private_subnet_cidrs" {
-  description = "CIDR blocks for private subnets"
+  description = "List of CIDR blocks for private subnets"
   type        = list(string)
 }
 
+variable "enable_nat_gateway" {
+  description = "Should be true to provision NAT Gateways for each private network"
+  type        = bool
+  default     = true
+}
+
+variable "single_nat_gateway" {
+  description = "Should be true to provision a single shared NAT Gateway across all private networks"
+  type        = bool
+  default     = false
+}
+
 variable "enable_dns_hostnames" {
-  description = "Enable DNS hostnames in the VPC"
+  description = "Should be true to enable DNS hostnames in the VPC"
   type        = bool
   default     = true
 }
 
 variable "enable_dns_support" {
-  description = "Enable DNS support in the VPC"
-  type        = bool
-  default     = true
-}
-
-variable "enable_nat_gateway" {
-  description = "Enable NAT Gateway for private subnets"
-  type        = bool
-  default     = true
-}
-
-variable "cluster_name" {
-  description = "Name of the EKS cluster"
-  type        = string
-}
-
-variable "kubernetes_cluster_tag_value" {
-  description = "Value for kubernetes.io/cluster tag (shared or owned)"
-  type        = string
-  default     = "shared"
-}
-
-variable "kubernetes_elb_tag_value" {
-  description = "Value for kubernetes.io/role/elb tag"
-  type        = string
-  default     = "1"
-}
-
-variable "kubernetes_internal_elb_tag_value" {
-  description = "Value for kubernetes.io/role/internal-elb tag"
-  type        = string
-  default     = "1"
-}
-
-variable "map_public_ip_on_launch" {
-  description = "Map public IP on launch for public subnets"
+  description = "Should be true to enable DNS support in the VPC"
   type        = bool
   default     = true
 }
 
 variable "tags" {
   description = "A map of tags to add to all resources"
+  type        = map(string)
+  default     = {}
+}
+
+variable "kubernetes_cluster_tags" {
+  description = "A map of Kubernetes cluster tags to add to VPC and subnets"
   type        = map(string)
   default     = {}
 }
