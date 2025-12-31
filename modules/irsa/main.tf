@@ -1,4 +1,4 @@
-data "aws_iam_policy_document" "assume_role" {
+data "aws_iam_policy_document" "assume_role_with_oidc" {
   statement {
     effect = "Allow"
 
@@ -11,70 +11,55 @@ data "aws_iam_policy_document" "assume_role" {
 
     condition {
       test     = "StringEquals"
-      variable = "${replace(var.oidc_provider_url, "https://", "")}:sub"
-      values   = ["system:serviceaccount:${var.kubernetes_namespace}:${var.kubernetes_service_account}"]
+      variable = "${var.oidc_provider_url}:sub"
+      values   = var.service_account_subjects
     }
 
     condition {
       test     = "StringEquals"
-      variable = "${replace(var.oidc_provider_url, "https://", "")}:aud"
-      values   = [var.oidc_audience]
+      variable = "${var.oidc_provider_url}:aud"
+      values   = ["sts.amazonaws.com"]
     }
   }
 }
 
-resource "aws_iam_role" "irsa" {
-  name_prefix        = var.role_name_prefix != "" ? var.role_name_prefix : "${var.kubernetes_service_account}-"
-  assume_role_policy = data.aws_iam_policy_document.assume_role.json
-  description        = var.role_description
-
-  max_session_duration = var.max_session_duration
+resource "aws_iam_role" "this" {
+  name               = var.role_name
+  assume_role_policy = data.aws_iam_policy_document.assume_role_with_oidc.json
 
   tags = merge(
-    var.tags,
     {
-      Name                                            = var.role_name_prefix != "" ? "${var.role_name_prefix}${var.kubernetes_service_account}" : var.kubernetes_service_account
-      "eks.amazonaws.com/role-name"                   = var.kubernetes_service_account
-      "kubernetes.io/service-account/name"            = var.kubernetes_service_account
-      "kubernetes.io/service-account/namespace"       = var.kubernetes_namespace
-    }
+      Name = var.role_name
+    },
+    var.tags
   )
 }
 
-resource "aws_iam_role_policy_attachment" "managed_policies" {
-  for_each = toset(var.managed_policy_arns)
+resource "aws_iam_policy" "this" {
+  count = var.policy_json != null ? 1 : 0
 
-  role       = aws_iam_role.irsa.name
-  policy_arn = each.value
-}
-
-resource "aws_iam_policy" "custom" {
-  count = var.create_custom_policy ? 1 : 0
-
-  name_prefix = "${var.kubernetes_service_account}-policy-"
-  description = "Custom policy for ${var.kubernetes_service_account}"
-  policy      = var.custom_policy_json
+  name        = "${var.role_name}-policy"
+  description = var.policy_description
+  policy      = var.policy_json
 
   tags = merge(
-    var.tags,
     {
-      Name = "${var.kubernetes_service_account}-policy"
-    }
+      Name = "${var.role_name}-policy"
+    },
+    var.tags
   )
 }
 
 resource "aws_iam_role_policy_attachment" "custom" {
-  count = var.create_custom_policy ? 1 : 0
+  count = var.policy_json != null ? 1 : 0
 
-  role       = aws_iam_role.irsa.name
-  policy_arn = aws_iam_policy.custom[0].arn
+  role       = aws_iam_role.this.name
+  policy_arn = aws_iam_policy.this[0].arn
 }
 
-# Optional: Create inline policies
-resource "aws_iam_role_policy" "inline" {
-  for_each = var.inline_policies
+resource "aws_iam_role_policy_attachment" "managed" {
+  count = length(var.managed_policy_arns)
 
-  name   = each.key
-  role   = aws_iam_role.irsa.name
-  policy = each.value
+  role       = aws_iam_role.this.name
+  policy_arn = var.managed_policy_arns[count.index]
 }

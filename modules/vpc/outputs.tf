@@ -1,11 +1,11 @@
 output "vpc_id" {
   description = "The ID of the VPC"
-  value       = aws_vpc.main.id
+  value       = aws_vpc.this.id
 }
 
-output "vpc_cidr" {
+output "vpc_cidr_block" {
   description = "The CIDR block of the VPC"
-  value       = aws_vpc.main.cidr_block
+  value       = aws_vpc.this.cidr_block
 }
 
 output "public_subnet_ids" {
@@ -20,16 +20,16 @@ output "private_subnet_ids" {
 
 output "nat_gateway_ids" {
   description = "List of NAT Gateway IDs"
-  value       = aws_nat_gateway.main[*].id
+  value       = aws_nat_gateway.this[*].id
 }
 
 output "internet_gateway_id" {
-  description = "ID of the Internet Gateway"
-  value       = aws_internet_gateway.main.id
+  description = "The ID of the Internet Gateway"
+  value       = aws_internet_gateway.this.id
 }
 
 output "public_route_table_id" {
-  description = "ID of the public route table"
+  description = "ID of public route table"
   value       = aws_route_table.public.id
 }
 

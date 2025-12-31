@@ -9,7 +9,7 @@ variable "node_group_name" {
 }
 
 variable "node_role_arn" {
-  description = "ARN of the IAM role for the node group"
+  description = "ARN of the IAM role for the EKS nodes"
   type        = string
 }
 
@@ -30,22 +30,22 @@ variable "desired_size" {
   default     = 2
 }
 
+variable "max_size" {
+  description = "Maximum number of nodes"
+  type        = number
+  default     = 3
+}
+
 variable "min_size" {
   description = "Minimum number of nodes"
   type        = number
   default     = 1
 }
 
-variable "max_size" {
-  description = "Maximum number of nodes"
+variable "max_unavailable" {
+  description = "Maximum number of nodes unavailable during update"
   type        = number
-  default     = 4
-}
-
-variable "max_unavailable_percentage" {
-  description = "Maximum percentage of nodes unavailable during update"
-  type        = number
-  default     = 33
+  default     = 1
 }
 
 variable "instance_types" {
@@ -55,91 +55,25 @@ variable "instance_types" {
 }
 
 variable "capacity_type" {
-  description = "Type of capacity: ON_DEMAND or SPOT"
+  description = "Type of capacity associated with the EKS Node Group. Valid values: ON_DEMAND, SPOT"
   type        = string
   default     = "ON_DEMAND"
 }
 
 variable "disk_size" {
-  description = "Disk size in GiB for nodes"
+  description = "Disk size in GiB for worker nodes"
   type        = number
   default     = 20
 }
 
-variable "disk_type" {
-  description = "EBS volume type (gp2, gp3, io1, io2)"
-  type        = string
-  default     = "gp3"
-}
-
-variable "disk_iops" {
-  description = "IOPS for io1 or io2 volumes"
-  type        = number
-  default     = null
-}
-
-variable "disk_throughput" {
-  description = "Throughput for gp3 volumes in MiB/s"
-  type        = number
-  default     = 125
-}
-
-variable "disk_encrypted" {
-  description = "Enable EBS encryption"
-  type        = bool
-  default     = true
-}
-
-variable "disk_kms_key_id" {
-  description = "KMS key ID for EBS encryption"
+variable "ec2_ssh_key" {
+  description = "EC2 Key Pair name for SSH access to nodes"
   type        = string
   default     = null
 }
 
-variable "create_launch_template" {
-  description = "Create a launch template for the node group"
-  type        = bool
-  default     = true
-}
-
-variable "enable_imdsv2" {
-  description = "Enable IMDSv2 (Instance Metadata Service Version 2)"
-  type        = bool
-  default     = true
-}
-
-variable "enable_monitoring" {
-  description = "Enable detailed monitoring"
-  type        = bool
-  default     = true
-}
-
-variable "security_group_ids" {
-  description = "List of security group IDs for nodes"
-  type        = list(string)
-  default     = []
-}
-
-variable "user_data_base64" {
-  description = "Base64 encoded user data for nodes"
-  type        = string
-  default     = null
-}
-
-variable "enable_remote_access" {
-  description = "Enable SSH remote access to nodes"
-  type        = bool
-  default     = false
-}
-
-variable "ssh_key_name" {
-  description = "EC2 SSH key name for remote access"
-  type        = string
-  default     = null
-}
-
-variable "remote_access_security_group_ids" {
-  description = "Security group IDs allowed for remote access"
+variable "source_security_group_ids" {
+  description = "Set of EC2 Security Group IDs to allow SSH access from"
   type        = list(string)
   default     = []
 }
@@ -151,7 +85,7 @@ variable "labels" {
 }
 
 variable "taints" {
-  description = "List of Kubernetes taints to apply to nodes"
+  description = "List of Kubernetes taints to be applied to the node group"
   type = list(object({
     key    = string
     value  = string
@@ -164,4 +98,10 @@ variable "tags" {
   description = "A map of tags to add to all resources"
   type        = map(string)
   default     = {}
+}
+
+variable "node_group_depends_on" {
+  description = "List of resources the node group depends on"
+  type        = any
+  default     = []
 }

@@ -1,74 +1,39 @@
-variable "cluster_name" {
-  description = "Name of the EKS cluster"
+variable "role_name" {
+  description = "Name of the IAM role for service account"
   type        = string
 }
 
 variable "oidc_provider_arn" {
-  description = "ARN of the OIDC provider for the EKS cluster"
+  description = "ARN of the OIDC provider for EKS"
   type        = string
 }
 
 variable "oidc_provider_url" {
-  description = "URL of the OIDC provider for the EKS cluster"
+  description = "URL of the OIDC provider for EKS (without https://)"
   type        = string
 }
 
-variable "kubernetes_namespace" {
-  description = "Kubernetes namespace for the service account"
-  type        = string
+variable "service_account_subjects" {
+  description = "List of service account subjects (system:serviceaccount:namespace:serviceaccount-name)"
+  type        = list(string)
 }
 
-variable "kubernetes_service_account" {
-  description = "Kubernetes service account name"
+variable "policy_json" {
+  description = "JSON policy document for the IAM role"
   type        = string
+  default     = null
 }
 
-variable "role_name_prefix" {
-  description = "Prefix for the IAM role name"
+variable "policy_description" {
+  description = "Description of the IAM policy"
   type        = string
-  default     = ""
-}
-
-variable "role_description" {
-  description = "Description of the IAM role"
-  type        = string
-  default     = "IRSA role for EKS service account"
-}
-
-variable "max_session_duration" {
-  description = "Maximum session duration in seconds"
-  type        = number
-  default     = 3600
-}
-
-variable "oidc_audience" {
-  description = "Audience for OIDC provider"
-  type        = string
-  default     = "sts.amazonaws.com"
+  default     = "IAM policy for Kubernetes service account"
 }
 
 variable "managed_policy_arns" {
   description = "List of managed policy ARNs to attach to the role"
   type        = list(string)
   default     = []
-}
-
-variable "create_custom_policy" {
-  description = "Whether to create a custom policy"
-  type        = bool
-  default     = false
-}
-
-variable "custom_policy_json" {
-  description = "JSON policy document for custom policy"
-  type        = string
-  default     = ""
-}
-
-variable "inline_policies" {
-  description = "Map of inline policies to attach to the role"
-  type        = map(string)
-  default     = {}
 }
 
 variable "tags" {
